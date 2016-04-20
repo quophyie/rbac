@@ -1,0 +1,7 @@
+// Place your settings in this file to overwrite default and user settings.
+{
+    "files.autoSave": "afterDelay",
+    "eslint.enable": true,
+    "jshint.enable": "enable",
+    "GitHubIssues.showPullRequests": true
+}
