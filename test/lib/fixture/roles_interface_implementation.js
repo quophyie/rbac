@@ -76,8 +76,8 @@ module.exports = {
       )
     },
     getRolePermissionsByRoleName: function (name) {
-      var permissions = []
-      var _roles = []
+      let permissions = []
+      let _roles = []
 
       _roles = _.filter(roles, function (item) {
         return item.roleName === name
