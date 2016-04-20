@@ -1,7 +1,7 @@
 {
-  "name": "users-component",
-  "version": "0.1.0",
-  "description": "A reusable component for authentication, authorization and pretty much anything user related",
+  "name": "@c8/rbac",
+  "version": "1.0.0",
+  "description": "An Rbac System that allows users of the module to determine how the rbac system interacts with thier own system ",
   "main": "lib/index.js",
   "engines": {
     "node": "4.3.1"
@@ -13,20 +13,18 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/c8management/users-component.git"
+    "url": "git+https://github.com/c8management/rbac.git"
   },
   "keywords": [
-    "authentication",
-    "authorization",
-    "jwt",
-    "dal"
+    "rbac",
+    "DAL"
   ],
-  "author": "C8management",
+  "author": "C8 Management",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/c8management/users-component/issues"
+    "url": "https://github.com/c8management/rbac/issues"
   },
-  "homepage": "https://github.com/c8management/users-component#readme",
+  "homepage": "https://github.com/c8management/rbac#readme"
   "devDependencies": {
     "body-parser": "^1.15.0",
     "code": "^2.2.0",
