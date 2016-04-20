@@ -86,7 +86,7 @@ describe('Rbac Express Tests', () => {
       })
       server.use(Auth.express.initialize())
       server.use(Auth.express.authenticate())
-      server.get('/test', (req, res)=>{
+      server.get('/test', (req, res) => {
 
       })
       rbacExpress = RbacExpress.initialize(opts, server)
