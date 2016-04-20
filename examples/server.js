@@ -67,7 +67,7 @@ server.get('/some-rbac', auth.express.authenticate(), rbacExpress.allow(['update
 server.get('/some-unauthorized-rbac', auth.express.authenticate(), rbacExpress.allow(['some_unkown_permision']), (req, res) => {
   res.send({ response: 'some other unknwn authorized content' })
 })
-server.use(rbacExpress.express(opts))
+server.use(rbacExpress.initialize(opts))
 server.get('/some-unreachable', auth.express.authenticate(), (req, res) => {
   res.send({ response: 'this url should be unreachable as there are no permissions set on the route' })
 })

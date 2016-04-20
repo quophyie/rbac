@@ -20,7 +20,7 @@ describe('Rbac Express Tests', () => {
   describe('RbacExpress Creation', () => {
     it('Should throw TypeError with reference to RolesDal if roles DAL is not provided', (done) => {
       const constructor = () => {
-        let rbacEx = RbacExpress.express({})
+        let rbacEx = RbacExpress.initialize({})
         rbacEx
       }
       expect(constructor).to.throw(TypeError, 'Parameter "rolesDalImpl" must be of Type "RolesDal"')
@@ -32,7 +32,7 @@ describe('Rbac Express Tests', () => {
         let opts = {
           RolesDal: RolesDalFixture.RolesDalMockImplementation
         }
-        let rbacEx = RbacExpress.express(opts)
+        let rbacEx = RbacExpress.initialize(opts)
         rbacEx
       }
       expect(constructor).to.throw(TypeError, 'Parameter "usersDalImpl" must be of Type "UsersDal"')
@@ -84,10 +84,13 @@ describe('Rbac Express Tests', () => {
 
         done()
       })
-      rbacExpress = RbacExpress.express(opts)
-      server.use(rbacExpress)
       server.use(Auth.express.initialize())
       server.use(Auth.express.authenticate())
+      server.get('/test', (req, res)=>{
+
+      })
+      rbacExpress = RbacExpress.initialize(opts, server)
+      server.use(rbacExpress)
       server.use(rbacExpress)
     })
 

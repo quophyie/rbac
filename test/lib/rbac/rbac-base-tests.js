@@ -68,7 +68,7 @@ describe('RbacBase Tests', function () {
       let rolesDal = new RolesDal(RolesDalFixture.RolesDalMockImplementation)
       var usersDal = new UsersDal(UsersDalFixture.UsersDalMockImplementation)
       rbacBase = new Rbac.RbacBase(rolesDal, usersDal)
-      rbacBase.init().then(() => {
+      rbacBase.initialize().then(() => {
         return rbacBase.getRules()
       }).then((rules) => {
         expect(rules).to.exist().and.to.be.an.object()
