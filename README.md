@@ -15,7 +15,7 @@ Check the `/examples` folder.
 
    * opts - Options for RbacExpress. It should at the  very least provide an implementation of roles DAL and  UsersDal and Users DAL and optionally a 'defaultAction' property which can have a value of `permit` or `deny`.
    ### NOTE : The `permit` and `deny` methods of RbacExpress require a `user` object on the `req` object with at least the following shape i.e.
-```
+```js
    req.user = {
                 id:  1 //The user id of the user we want to test permissions for
               }
@@ -83,7 +83,7 @@ The default action to perform if a user's does not have a specified permision. C
   one of the permissions on a given role in order to be evaulated as true. For example, if a role is defined as
 
 
-```
+```js
 role  = {
             id: 1,
             name: 'RoleA',
@@ -98,7 +98,7 @@ role  = {
 
 ## RolesDal Mock Implementation
 file roles_interface_implementation.js
-```
+```js
 use strict'
 var _ = require('lodash')
 var Promise = require('bluebird')
@@ -233,7 +233,7 @@ module.exports = {
 ```
 
 ## UserDal Mock Implementation
-```
+```js
 'use strict'
 const Roles = require('./roles_interface_implementation').Roles
 const Promise = require('bluebird')
@@ -273,7 +273,7 @@ module.exports = {
 }
 ```
 ## RbacExpress Usage
-```
+```js
 const app = require('express')
 const rbacExpress = require('@c8/rbac').Express
 const rolesDalMock = require('./roles_interface_implementation')
@@ -309,7 +309,7 @@ server.listen(9000, () => {
 })
 ```
 ### RbacBase Usage
-```
+```js
   const app = require('express')
   const rbacBase = require('@c8/rbac').RbacBase
   const rolesDalMock = require('./roles_interface_implementation')
