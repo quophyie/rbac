@@ -1,6 +1,6 @@
 {
   "name": "@c8/rbac",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "An Rbac System that allows users of the module to determine how the rbac system interacts with thier own system ",
   "main": "lib/index.js",
   "engines": {
