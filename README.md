@@ -57,23 +57,42 @@ Check the `/examples` folder.
  #### }
 
 ### RbaceExpress.allow(permissions, permissionsGroup) -  
-  #### Allows access to the next middleware if the user has one of the permissions in the permissions array
+  Allows access to the next middleware if the user has one of the permissions in the permissions array
 
-   * @param permissions: an array of permissions which allow  access to the next middleware
-   * @param permissionsGroup: [optional] The permission group to which the array of permissions belong (for e.g. 'Credentials', 'UsersAccess' etc). If you are unsure, then dont provide this parameter,in which case the permission will added to the **`'DEFAULT'`** permissions group
-   * @returns express middleware
+   + @param permissions: an array of permissions which allow  access to the next middleware
+   + @param permissionsGroup: [optional] The permission group to which the array of permissions belong (for e.g. 'Credentials', 'UsersAccess' etc). If you are unsure, then dont provide this parameter,in which case the permission will added to the **`'DEFAULT'`** permissions group
+   + @returns express middleware
 
 ### RbaceExpress.deny(permissions, permissionsGroup) -  
-   #### Denies access to the next middleware if the user has one of the permissions in the permissions array (i.e. the next middleware is **not** called)
+   Denies access to the next middleware if the user has one of the permissions in the permissions array (i.e. the next middleware is **not** called)
 
-    * @param {array} permissions: an array of permissions which allow  access to the next middleware
-    * @param permissionsGroup: [optional] The permission group to which the array of permissions belong (for e.g. 'Credentials', 'UsersAccess' etc). If you are unsure, then dont provide this parameter,in which case the permission will added to the **`'DEFAULT'`** permissions group
-    * @returns express middleware
+  + @param {array} permissions: an array of permissions which allow  access to the next middleware
+  + @param permissionsGroup: [optional] The permission group to which the array of permissions belong (for e.g. 'Credentials', 'UsersAccess' etc). If you are unsure, then dont provide this parameter,in which case the permission will added to the **`'DEFAULT'`** permissions group
+  + @returns express middleware
 
 # RbacBase
-### Use RbacBase if you just want the RBAC functionality without the express wrapper
+### Use RbacBase if you just want the RBAC functionality without the express wrapper. This is a base implentation of Rbac System. This class drives the rbac system
 
 ## contructor
+
+ + @param {RolesDal}  rolesDalImpl -  An implentation of the RolesDal interface
+ + @param {UsersDal} usersDalImpl - An implentation of the UsersDal interface
+ + @param {string} permsGroup - The permissionGroup that RbacBase must work on. It allows callers to define different groups of permissions. For example 'Credentials' group, 'UserAccess' group. If not
+ the RbacBase will assume the 'DEFAULT' permission group.
+ *** NOTE *** If permGroup is provided, then same permissionGroup must be provided when `permit` and `deny`  methods are called
+ + @param {boolean} conjunction - a boolean that specifies how permissions must be evaluated. If `true`, then permissions array in params list of `permit` or `deny`  methods must match
+  all the permissions on a given role in order to be evaulated as true. If `false`,then permissions array in params list of `permit` or `deny`  methods must match
+  one of the permissions on a given role in order to be evaulated as true. For example, if a role is defined as
+
+       role  = {
+            id: 1,
+            name: 'RoleA',
+            permissions: ['update','read']
+           }
+
+  If @conjunction = true, then permissions array in params list of `permit` or `deny`  methods must be ['update','read'] in order to evaluate to true, If however, @conjunction = false,
+  then permissions array in params list of `permit` or `deny`  methods cab be on of ['update','read'] , ['update'] or ['read']  in order to evaluate to true.
+  The default value is false
 
 # Example
 
@@ -213,7 +232,7 @@ module.exports = {
 }
  ```
 
- ## UserDal Mock Implementation
+## UserDal Mock Implementation
 ```
 
 'use strict'
@@ -254,7 +273,7 @@ module.exports = {
   }
 }
 ```
-### RbacExpress Usage
+## RbacExpress Usage
 ```
 const app = require('express')
 const rbacExpress = require('@c8/rbac').Express
@@ -289,10 +308,10 @@ server.get('/some-unreachable', auth.express.authenticate(), (req, res) => {
 server.listen(9000, () => {
   console.log('Listening on http://localhost:9000')
 })
-  ```    
+```    
 
-  ### RbacBase Usage
-  ```
+### RbacBase Usage
+```
   const app = require('express')
   const rbacBase = require('@c8/rbac').RbacBase
   const rolesDalMock = require('./roles_interface_implementation')
@@ -321,7 +340,7 @@ server.listen(9000, () => {
        //handle error
   })
  })
-    ```    
+```    
 ## Tests
 
 The following commands are available:
