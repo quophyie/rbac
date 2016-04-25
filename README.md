@@ -301,7 +301,13 @@ server.get('/some-rbac', rbacExpress.allow(['update']), (req, res) => {
 server.get('/some-unauthorized-rbac', rbacExpress.allow(['some_unkown_permision']), (req, res) => {
   res.send({ response: 'some other unknwn authorized content' })
 })
-// The response below will be an error response the route \ url does not have an rbac operation attached to it
+
+// The users with the permission `standard_user` will be denied access to the resource i.e The client will recieve an error response i.e **`{ "error_code": 1100,"error": "Permission to resource }`**
+
+server.get('/rbacExpress', auth.express.authenticate(), rbacExpress.deny(['standard_user']), (req, res) => {
+  res.send({ response: 'some denied authorized content' })
+})
+// The response below will be an error response (i.e **`{ "error_code": 1100,"error": "Permission to resource }`**) because the route \ url does not have an rbac operation attached to it
 server.get('/some-unreachable', auth.express.authenticate(), (req, res) => {
   res.send({ response: 'this url should be unreachable as there are no permissions set on the route' })
 })
