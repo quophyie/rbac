@@ -99,7 +99,7 @@ role  = {
 ## RolesDal Mock Implementation
 file roles_interface_implementation.js
 ```js
-use strict'
+'use strict'
 var _ = require('lodash')
 var Promise = require('bluebird')
 const roles = [
