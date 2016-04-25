@@ -11,86 +11,86 @@ Check the `/examples` folder.
 ## API
 ### RbacExpress
 
- ### RbaceExpress.initialize(opts) - Initialises RbacExpress module.
+#### RbaceExpress.initialize(opts) - Initialises RbacExpress module.
 
    * opts - Options for RbacExpress. It should at the  very least provide an implementation of roles DAL and  UsersDal and Users DAL and optionally a 'defaultAction' property which can have a value of `permit` or `deny`.
    ### NOTE : The `permit` and `deny` methods of RbacExpress require a `user` object on the `req` object with at least the following shape i.e.
-   ```
+```
    req.user = {
                 id:  1 //The user id of the user we want to test permissions for
               }
-    ```
+```
    The `opts` object is defined as follows
 
-   #### opts
-     RolesDal interface  
-    ###### RolesDal: [required]{
+#### opts
+**// RolesDal interface**  
+#### RolesDal: [required]{
+* **findById**: Returns a role using the role id. Function implementation must take a role id as the only param. Function must return a bluebird promise
 
-     * **findById**: Returns a role using the role id. Function implementation must take a role id as the only param. Function must return a bluebird promise
+* **findByName**: Returns a role using the role name. Function implementation must take a role name as the only param. Function must return a bluebird promise
 
-     * **findByName**: Returns a role using the role name. Function implementation must take a role name as the only param. Function must return a bluebird promise
+* **getRoleName**: Returns a role's name. Function implementation must take a role instance as the only param. Function must return a bluebird promise
+* **getRoleId**: Returns a role id using of the given role. Function implementation must take a role instance as the only param. Function must return a bluebird promise
 
-     * **getRoleName**: Returns a role's name. Function implementation must take a role instance as the only param. Function must return a bluebird promise
-     * **getRoleId**: Returns a role id using of the given role. Function implementation must take a role instance as the only param. Function must return a bluebird promise
+* getRolePermissionsByRoleName: Returns an array permissions of role using a role name. Function implementation must take a role name as the only param. Function must return a bluebird promise
+* **getRolePermissionsByRoleId**: Returns an array permissions of role using a role id. Function implementation must take a role id as the only param. Function must return a bluebird promise,
+* **findRolesByPermission**: Returns an array roles of of a given permission. Function implementation must take an instance of a permission as the only param. Function must return a bluebird promise,
+* **getPermissionName**: Returns a given permission's name. Function implementation must take an instance of a permission as the only param. Function must return a bluebird promise
+* **getPermissionId**: Returns a given permission's id. Function implementation must take an instance of a permission as the only param. Function must return a bluebird promise,
 
-     * getRolePermissionsByRoleName: Returns an array permissions of role using a role name. Function implementation must take a role name as the only param. Function must return a bluebird promise
-     * **getRolePermissionsByRoleId**: Returns an array permissions of role using a role id. Function implementation must take a role id as the only param. Function must return a bluebird promise,
-     findRolesByPermission: Returns an array roles of of a given permission. Function implementation must take an instance of a permission as the only param. Function must return a bluebird promise,
-
-     * **getPermissionName**: Returns a given permission's name. Function implementation must take an instance of a permission as the only param. Function must return a bluebird promise
-     * **getPermissionId**: Returns a given permission's id. Function implementation must take an instance of a permission as the only param. Function must return a bluebird promise,
-
-     * **findAllRoles**: Returns all roles in  the system. The function does not take any params. Function must return a bluebird promise
+* **findAllRoles**: Returns all roles in  the system. The function does not take any params. Function must return a bluebird promise
    #### },
+**// UsersDal interface**
+#### UsersDal: { [required]
 
-    UsersDal interface
-    #### UsersDal: { [required]
+*  **findUserById** : Returns user in the system using the user id. Function implementation must take the user's id as the only param. Function must return a bluebird promise,
 
-      *  **findUserById** : Returns user in the system using the user id. Function implementation must take the user's id as the only param. Function must return a bluebird promise,
-
-      *  **getUserRolesByUserId**: Returns user's roles using the user id. Function implementation must take the user's id as the only param. Function must return a bluebird promise
-  #### },
-  The default action to perform if a user's does not have a specified permision. Can be one of `permit` or `deny`
-  #### defaultAction : default 'deny' [optional].
-  * An instance of the express app
-  #### app: app [optional]
- #### }
+*  **getUserRolesByUserId**: Returns user's roles using the user id. Function implementation must take the user's id as the only param. Function must return a bluebird promise
+#### },
+The default action to perform if a user's does not have a specified permision. Can be one of `permit` or `deny`
+#### defaultAction : default 'deny' [optional].
+* An instance of the express app
+#### app: app [optional]
+#### }
 
 ### RbaceExpress.allow(permissions, permissionsGroup) -  
   Allows access to the next middleware if the user has one of the permissions in the permissions array
 
-   + @param permissions: an array of permissions which allow  access to the next middleware
-   + @param permissionsGroup: [optional] The permission group to which the array of permissions belong (for e.g. 'Credentials', 'UsersAccess' etc). If you are unsure, then dont provide this parameter,in which case the permission will added to the **`'DEFAULT'`** permissions group
+   + **@param permissions**: an array of permissions which allow  access to the next middleware
+   + **@param permissionsGroup**: [optional] The permission group to which the array of permissions belong (for e.g. `Credentials`, `UsersAccess` etc). If you are unsure, then dont provide this parameter,in which case the permission will added to the **`'DEFAULT'`** permissions group
    + @returns express middleware
 
 ### RbaceExpress.deny(permissions, permissionsGroup) -  
    Denies access to the next middleware if the user has one of the permissions in the permissions array (i.e. the next middleware is **not** called)
 
-  + @param {array} permissions: an array of permissions which allow  access to the next middleware
-  + @param permissionsGroup: [optional] The permission group to which the array of permissions belong (for e.g. 'Credentials', 'UsersAccess' etc). If you are unsure, then dont provide this parameter,in which case the permission will added to the **`'DEFAULT'`** permissions group
-  + @returns express middleware
+  + **@param {array} permissions**: an array of permissions which allow  access to the next middleware
+  + **@param permissionsGroup**: [optional] The permission group to which the array of permissions belong (for e.g. `Credentials`, `UsersAccess` etc). If you are unsure, then dont provide this parameter,in which case the permission will added to the **`'DEFAULT'`** permissions group
+  + **@returns** express middleware
 
 # RbacBase
 ### Use RbacBase if you just want the RBAC functionality without the express wrapper. This is a base implentation of Rbac System. This class drives the rbac system
 
 ## contructor
 
- + @param {RolesDal}  rolesDalImpl -  An implentation of the RolesDal interface
- + @param {UsersDal} usersDalImpl - An implentation of the UsersDal interface
- + @param {string} permsGroup - The permissionGroup that RbacBase must work on. It allows callers to define different groups of permissions. For example 'Credentials' group, 'UserAccess' group. If not
+ + **@param {RolesDal}  rolesDalImpl** -  An implentation of the RolesDal interface
+ + **@param {UsersDal} usersDalImpl** - An implentation of the UsersDal interface
+ + **@param {string} permsGroup** - The permissionGroup that RbacBase must work on. It allows callers to define different groups of permissions. For example 'Credentials' group, 'UserAccess' group. If not
  the RbacBase will assume the 'DEFAULT' permission group.
+
  *** NOTE *** If permGroup is provided, then same permissionGroup must be provided when `permit` and `deny`  methods are called
- + @param {boolean} conjunction - a boolean that specifies how permissions must be evaluated. If `true`, then permissions array in params list of `permit` or `deny`  methods must match
+ + **@param {boolean} conjuncti**on - a boolean that specifies how permissions must be evaluated. If `true`, then permissions array in params list of `permit` or `deny`  methods must match
   all the permissions on a given role in order to be evaulated as true. If `false`,then permissions array in params list of `permit` or `deny`  methods must match
   one of the permissions on a given role in order to be evaulated as true. For example, if a role is defined as
 
-       role  = {
+
+```
+role  = {
             id: 1,
             name: 'RoleA',
             permissions: ['update','read']
            }
-
-  If @conjunction = true, then permissions array in params list of `permit` or `deny`  methods must be ['update','read'] in order to evaluate to true, If however, @conjunction = false,
+```
+  If `@conjunction = true`, then permissions array in params list of `permit` or `deny`  methods must be ['update','read'] in order to evaluate to true, If however, @conjunction = false,
   then permissions array in params list of `permit` or `deny`  methods cab be on of ['update','read'] , ['update'] or ['read']  in order to evaluate to true.
   The default value is false
 
@@ -230,11 +230,10 @@ module.exports = {
 
   }
 }
- ```
+```
 
 ## UserDal Mock Implementation
 ```
-
 'use strict'
 const Roles = require('./roles_interface_implementation').Roles
 const Promise = require('bluebird')
@@ -308,8 +307,7 @@ server.get('/some-unreachable', auth.express.authenticate(), (req, res) => {
 server.listen(9000, () => {
   console.log('Listening on http://localhost:9000')
 })
-```    
-
+```
 ### RbacBase Usage
 ```
   const app = require('express')
@@ -340,7 +338,7 @@ server.listen(9000, () => {
        //handle error
   })
  })
-```    
+```   
 ## Tests
 
 The following commands are available:
