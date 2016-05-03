@@ -4,7 +4,6 @@ const Code = require('code')
 const expect = Code.expect
 const RbacExpress = require('./../../../../lib/index').Express
 const RolesDalFixture = require('./../../fixture/roles_interface_implementation')
-const UsersDalFixture = require('./../../fixture/user_dal_interface_implementation')
 const createServer = require('./../../../mock_server')
 const supertest = require('supertest')
 const AuthStrategy = require('@c8/auth')
@@ -27,7 +26,7 @@ describe('Rbac Express Tests', () => {
       done()
     })
 
-    it('Should throw TypeError with reference to UsersDal if users DAL is not provided', (done) => {
+    /* it('Should throw TypeError with reference to UsersDal if users DAL is not provided', (done) => {
       const constructor = () => {
         let opts = {
           RolesDal: RolesDalFixture.RolesDalMockImplementation
@@ -37,7 +36,7 @@ describe('Rbac Express Tests', () => {
       }
       expect(constructor).to.throw(TypeError, 'Parameter "usersDalImpl" must be of Type "UsersDal"')
       done()
-    })
+    }) */
   })
 
   describe('RbacExpress Initialization Errors', () => {
@@ -71,8 +70,8 @@ describe('Rbac Express Tests', () => {
   })
   describe('RbacExpress Functionality Tests', () => {
     let opts = {
-      RolesDal: RolesDalFixture.RolesDalMockImplementation,
-      UsersDal: UsersDalFixture.UsersDalMockImplementation
+      RolesDal: RolesDalFixture.RolesDalMockImplementation // ,
+      // UsersDal: UsersDalFixture.UsersDalMockImplementation
     }
     let rbacExpress
     let bearerAndToken = ''

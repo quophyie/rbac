@@ -28,7 +28,8 @@ describe('Roles DAL Tests', function () {
         'The required method "getRolePermissionsByRoleId" is not implemented; ' +
         'The required method "findRolesByPermission" is not implemented; ' +
         'The required method "getPermissionName" is not implemented; ' +
-        'The required method "getPermissionId" is not implemented')
+        'The required method "getPermissionId" is not implemented; ' +
+        'The required method "findMemberRoles" is not implemented')
       done()
     })
     'Parameter "permissionsGroup" must be of Type "String"'

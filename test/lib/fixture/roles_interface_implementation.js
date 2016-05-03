@@ -60,8 +60,21 @@ var roles = [
   }
 ]
 
+let roleMembers = [
+  {
+    id: 1,
+    email: 'superman@c8management.com',
+    roles: [roles[0], roles[2]]
+  },
+  {
+    id: 2,
+    email: 'batman@c8management.com',
+    roles: [roles[2]]
+  }
+]
 module.exports = {
   Roles: roles,
+  RoleMembers: roleMembers,
   RolesDalMockImplementation: {
     findById: function (id) {
       return Promise.resolve(_.find(roles, function (item) {
@@ -125,6 +138,13 @@ module.exports = {
     },
     getPermissionId: function (permission) {
       return Promise.resolve(permission.id)
+    },
+    findMemberRoles: (id) => {
+      let foundUser = _.find(roleMembers, (member) => {
+        return member.id === id
+      })
+
+      return Promise.resolve(foundUser.roles)
     }
 
   }

@@ -5,10 +5,8 @@ const Express = require('express')
 const bodyParser = require('body-parser')
 const rbacExpress = require('./../lib/index').Express
 const RolesDalFixture = require('./../test/lib/fixture/roles_interface_implementation')
-const UsersDalFixture = require('./../test/lib/fixture/user_dal_interface_implementation')
 let opts = {
-  RolesDal: RolesDalFixture.RolesDalMockImplementation,
-  UsersDal: UsersDalFixture.UsersDalMockImplementation
+  RolesDal: RolesDalFixture.RolesDalMockImplementation
 }
 
 const server = new Express()

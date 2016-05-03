@@ -4,9 +4,7 @@ var Code = require('code')
 var expect = Code.expect
 var Rbac = require('./../../../lib/index')
 var RolesDal = Rbac.Dal.RolesDal // require('./../../../lib/index').Dal.RolesDal
-var UsersDal = Rbac.Dal.UsersDal
 var RolesDalFixture = require('./../fixture/roles_interface_implementation')
-var UsersDalFixture = require('./../fixture/user_dal_interface_implementation')
 
 describe('RbacBase Tests', function () {
   describe('RbacBase Instance Creation', function () {
@@ -22,14 +20,13 @@ describe('RbacBase Tests', function () {
 
     it('Should create a new RbacBase object when an instance of RolesDal is provided', function (done) {
       var rolesDal = new RolesDal(RolesDalFixture.RolesDalMockImplementation)
-      var usersDal = new UsersDal(UsersDalFixture.UsersDalMockImplementation)
-      var rbacBase = new Rbac.RbacBase(rolesDal, usersDal)
+      var rbacBase = new Rbac.RbacBase(rolesDal)
       expect(rbacBase).to.be.an.object()
       expect(rbacBase).to.be.an.instanceof(Rbac.RbacBase)
       done()
     })
 
-    it('Should throw a TypeError exception if usersDal object passed to RbacBase constructor is not of  type UsersDal', function (done) {
+    /* it('Should throw a TypeError exception if usersDal object passed to RbacBase constructor is not of  type UsersDal', function (done) {
       var constructor = function () {
         let permissionsGroup = 'Test'
         let rolesDal = new RolesDal(RolesDalFixture.RolesDalMockImplementation)
@@ -38,14 +35,13 @@ describe('RbacBase Tests', function () {
       }
       expect(constructor).to.throw(TypeError, 'Parameter "usersDalImpl" must be of Type "UsersDal"')
       done()
-    })
+    }) */
 
     it('Should throw TypeError if permissionGroup param provided is not of type String', function (done) {
       var constructor = function () {
         let permissionsGroup = {}
         let rolesDal = new RolesDal(RolesDalFixture.RolesDalMockImplementation)
-        var usersDal = new UsersDal(UsersDalFixture.UsersDalMockImplementation)
-        let rb = new Rbac.RbacBase(rolesDal, usersDal, permissionsGroup)
+        let rb = new Rbac.RbacBase(rolesDal, permissionsGroup)
         rb
       }
       expect(constructor).to.throw(TypeError, 'Parameter "permissionsGroup" must be of Type "String"')
@@ -55,8 +51,7 @@ describe('RbacBase Tests', function () {
     it('Should create  a new instance of RbacBase if permissionGroup param of type String', function (done) {
       let permissionsGroup = 'TEST_PERMISSION_GROUP'
       let rolesDal = new RolesDal(RolesDalFixture.RolesDalMockImplementation)
-      var usersDal = new UsersDal(UsersDalFixture.UsersDalMockImplementation)
-      let rbacBase = new Rbac.RbacBase(rolesDal, usersDal, permissionsGroup)
+      let rbacBase = new Rbac.RbacBase(rolesDal, permissionsGroup)
       expect(rbacBase).to.be.an.object()
       expect(rbacBase).to.be.an.instanceof(Rbac.RbacBase)
       done()
@@ -66,8 +61,7 @@ describe('RbacBase Tests', function () {
     let rbacBase = null
     before((done) => {
       let rolesDal = new RolesDal(RolesDalFixture.RolesDalMockImplementation)
-      var usersDal = new UsersDal(UsersDalFixture.UsersDalMockImplementation)
-      rbacBase = new Rbac.RbacBase(rolesDal, usersDal)
+      rbacBase = new Rbac.RbacBase(rolesDal)
       rbacBase.initialize().then(() => {
         return rbacBase.getRules()
       }).then((rules) => {
@@ -92,7 +86,7 @@ describe('RbacBase Tests', function () {
     })
 
     it('Should true when permit is called for a user with the correct permissions', function (done) {
-      rbacBase.permit(UsersDalFixture.Users[0].id, ['update']).then((result) => {
+      rbacBase.permit(RolesDalFixture.RoleMembers[0].id,null ,['update']).then((result) => {
         expect(result).to.be.not.null()
         expect(result).to.be.true()
       }).then(done)
@@ -100,7 +94,7 @@ describe('RbacBase Tests', function () {
     })
 
     it('Should false when permit is called for a user with the correct permissions', function (done) {
-      rbacBase.permit(UsersDalFixture.Users[1].id, ['update']).then((result) => {
+      rbacBase.permit(RolesDalFixture.RoleMembers[1].id,null, ['update']).then((result) => {
         expect(result).to.be.not.null()
         expect(result).to.be.false()
       }).then(done)
@@ -108,7 +102,7 @@ describe('RbacBase Tests', function () {
     })
 
     it('Should false when permit is called for a user without any permissions', function (done) {
-      rbacBase.permit(UsersDalFixture.Users[1].id, []).then((result) => {
+      rbacBase.permit(RolesDalFixture.RoleMembers[1].id,null ,[]).then((result) => {
         expect(result).to.be.not.null()
         expect(result).to.be.false()
       }).then(done)
@@ -116,7 +110,7 @@ describe('RbacBase Tests', function () {
     })
 
     it('Should false when permit is called for a user a null permissions', function (done) {
-      rbacBase.permit(UsersDalFixture.Users[1].id, null).then((result) => {
+      rbacBase.permit(RolesDalFixture.RoleMembers[1].id, null).then((result) => {
         expect(result).to.be.not.null()
         expect(result).to.be.false()
       }).then(done)
@@ -124,7 +118,7 @@ describe('RbacBase Tests', function () {
     })
 
     it('Should true when deny is called for a user with the correct permissions', function (done) {
-      rbacBase.deny(UsersDalFixture.Users[0].id, ['update']).then((result) => {
+      rbacBase.deny(RolesDalFixture.RoleMembers[0].id, null, ['update']).then((result) => {
         expect(result).to.be.not.null()
         expect(result).to.be.true()
       }).then(done)
@@ -132,7 +126,7 @@ describe('RbacBase Tests', function () {
     })
 
     it('Should false when deny is called for a user with the correct permissions', function (done) {
-      rbacBase.deny(UsersDalFixture.Users[1].id, []).then((result) => {
+      rbacBase.deny(RolesDalFixture.RoleMembers[1].id, []).then((result) => {
         expect(result).to.be.not.null()
         expect(result).to.be.false()
       }).then(done)

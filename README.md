@@ -1,5 +1,5 @@
 # RBAC
-A reusable package for role based access (authorization). This package user defines the roles, permissions and a users stores / db. This package will simple plugs into roles, permissions and a users stores / db to effect RBAC. The this module is  agnostic of the underlying data store / db. This means that you can use any database / datat store that you want e.g. `Postgres`, `Mongo Db`, `Cassandra` etc. To use the package, you simply implement the defined interfaces and you are ready to go
+A reusable package for role based access (authorization). This package user defines the roles, permissions and a role members store / db. This package will simple plugs into roles, permissions and a role members store / db to effect RBAC. The this module is  agnostic of the underlying data store / db. This means that you can use any database / data store that you want e.g. `Postgres`, `Mongo Db`, `Cassandra` or even a file or simple file system etc. To use the package, you simply implement the defined interfaces and you are ready to go
 
 ## Main Components
 + RBACBase (A base implementation of Role-Based Access Control)
@@ -23,7 +23,8 @@ Check the `/examples` folder.
    The `opts` object is defined as follows
 
 #### opts
-**// RolesDal interface**  
+**// RolesDal interface: The primary interface that must be implemented**
+
 #### RolesDal: [required]{
 * **findById**: Returns a role using the role id. Function implementation must take a role id as the only param. Function must return a bluebird promise
 
@@ -39,14 +40,8 @@ Check the `/examples` folder.
 * **getPermissionId**: Returns a given permission's id. Function implementation must take an instance of a permission as the only param. Function must return a bluebird promise,
 
 * **findAllRoles**: Returns all roles in  the system. The function does not take any params. Function must return a bluebird promise
+* **findMemberRoles**: Returns a role member's roles using the member id and an optional member type (e.g. Member Types i.e. 'USER', 'EXTERNAL_APPLICATION', etc). Member types are used to discriminate between the different groups / types in the role member data store /db. For example if you have an external user role members store /db  and an internal user's role members store / db, you can use the `memberType` param to tell the function how to retrieve roles for internal members and external members and hence to possibly call different retrieval services for the the different types of members. Function implementation must take the member's id and an optional member type
    #### },
-**// UsersDal interface**
-#### UsersDal: { [required]
-
-*  **findUserById** : Returns user in the system using the user id. Function implementation must take the user's id as the only param. Function must return a bluebird promise,
-
-*  **getUserRolesByUserId**: Returns user's roles using the user id. Function implementation must take the user's id as the only param. Function must return a bluebird promise
-#### },
 The default action to perform if a user's does not have a specified permision. Can be one of `permit` or `deny`
 #### defaultAction : default 'deny' [optional].
 * An instance of the express app
@@ -161,6 +156,20 @@ const roles = [
   }
 ]
 
+
+let roleMembers = [
+  {
+    id: 1,
+    email: 'superman@c8management.com',
+    roles: [roles[0], roles[2]]
+  },
+  {
+    id: 2,
+    email: 'batman@c8management.com',
+    roles: [roles[2]]
+  }
+]
+
 module.exports = {
   Roles: roles,
   RolesDalMockImplementation: {
@@ -226,52 +235,16 @@ module.exports = {
     },
     getPermissionId: function (permission) {
       return Promise.resolve(permission.id)
-    }
-
-  }
-}
-```
-
-## UserDal Mock Implementation
-```js
-'use strict'
-const Roles = require('./roles_interface_implementation').Roles
-const Promise = require('bluebird')
-const _ = require('lodash')
-
-let users = [
-  {
-    id: 1,
-    email: 'superman@c8management.com',
-    roles: [Roles[0], Roles[2]]
-  },
-  {
-    id: 2,
-    email: 'batman@c8management.com',
-    roles: [Roles[2]]
-  }
-]
-
-module.exports = {
-  Users: users,
-  UsersDalMockImplementation: {
-    findUserById: (id) => {
-      let foundUser = _.find(users, (user) => {
-        return user.id === id
-      })
-
-      return Promise.resolve(foundUser)
     },
-    getUserRolesByUserId: (id) => {
-      let foundUser = _.find(users, (user) => {
-        return user.id === id
-      })
+     // Returns a role member's roles using the member id. Function implementation must take the member's id and an optional member type (e.g. Member Types i.e. 'USER', 'EXTERNAL_APPLICATION', etc) as the only params. Function must return a bluebird promise
+    findMemberRolesByMemberId: function (memberId, memberType) {
+       return Promise.resolve(memberRoles)
+    },
 
-      return Promise.resolve(foundUser.roles)
-    }
   }
 }
 ```
+
 ## RbacExpress Usage
 ```js
 const app = require('express')
