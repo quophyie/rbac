@@ -86,7 +86,7 @@ describe('RbacBase Tests', function () {
     })
 
     it('Should true when permit is called for a user with the correct permissions', function (done) {
-      rbacBase.permit(RolesDalFixture.RoleMembers[0].id,null ,['update']).then((result) => {
+      rbacBase.permit(RolesDalFixture.RoleMembers[0].id, null, ['update']).then((result) => {
         expect(result).to.be.not.null()
         expect(result).to.be.true()
       }).then(done)
@@ -94,7 +94,7 @@ describe('RbacBase Tests', function () {
     })
 
     it('Should false when permit is called for a user with the correct permissions', function (done) {
-      rbacBase.permit(RolesDalFixture.RoleMembers[1].id,null, ['update']).then((result) => {
+      rbacBase.permit(RolesDalFixture.RoleMembers[1].id, null, ['update']).then((result) => {
         expect(result).to.be.not.null()
         expect(result).to.be.false()
       }).then(done)
@@ -102,7 +102,7 @@ describe('RbacBase Tests', function () {
     })
 
     it('Should false when permit is called for a user without any permissions', function (done) {
-      rbacBase.permit(RolesDalFixture.RoleMembers[1].id,null ,[]).then((result) => {
+      rbacBase.permit(RolesDalFixture.RoleMembers[1].id, null, []).then((result) => {
         expect(result).to.be.not.null()
         expect(result).to.be.false()
       }).then(done)
