@@ -17,7 +17,8 @@ Check the `/examples` folder.
    ### NOTE : The `permit` and `deny` methods of RbacExpress require a `user` object on the `req` object with at least the following shape i.e.
 ```js
    req.user = {
-                id:  1 //The user id of the user we want to test permissions for
+                id:  1, //The user id of the user we want to test permissions for
+                target:'SOME_MEMBER_TYE' // The target refers to the memberType e.g. 'USER', 'EXTERNAL_APP', etc
               }
 ```
    The `opts` object is defined as follows
