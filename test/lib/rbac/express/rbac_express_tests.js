@@ -16,6 +16,7 @@ let Auth = new AuthStrategy({
   }
 })
 let PORT = 0
+PORT
 describe('Rbac Express Tests', () => {
   describe('RbacExpress Creation', () => {
     it('Should throw TypeError with reference to RolesDal if roles DAL is not provided', (done) => {
