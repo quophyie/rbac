@@ -15,6 +15,7 @@ let Auth = new AuthStrategy({
     done(null, jwtPayload)
   }
 })
+let PORT = 0
 describe('Rbac Express Tests', () => {
   describe('RbacExpress Creation', () => {
     it('Should throw TypeError with reference to RolesDal if roles DAL is not provided', (done) => {
@@ -26,17 +27,17 @@ describe('Rbac Express Tests', () => {
       done()
     })
 
-    /* it('Should throw TypeError with reference to UsersDal if users DAL is not provided', (done) => {
-      const constructor = () => {
-        let opts = {
-          RolesDal: RolesDalFixture.RolesDalMockImplementation
-        }
-        let rbacEx = RbacExpress.initialize(opts)
-        rbacEx
+  /* it('Should throw TypeError with reference to UsersDal if users DAL is not provided', (done) => {
+    const constructor = () => {
+      let opts = {
+        RolesDal: RolesDalFixture.RolesDalMockImplementation
       }
-      expect(constructor).to.throw(TypeError, 'Parameter "usersDalImpl" must be of Type "UsersDal"')
-      done()
-    }) */
+      let rbacEx = RbacExpress.initialize(opts)
+      rbacEx
+    }
+    expect(constructor).to.throw(TypeError, 'Parameter "usersDalImpl" must be of Type "UsersDal"')
+    done()
+  }) */
   })
 
   describe('RbacExpress Initialization Errors', () => {
@@ -44,6 +45,11 @@ describe('Rbac Express Tests', () => {
     const _RbacExpress = require('./../../../../lib/index').Express
     beforeEach(function (done) {
       server = createServer()
+
+      const listener = server.listen(0)
+      listener.on('listening', function () {
+        PORT = listener.address().port
+      })
       bearerAndToken = ''
       Auth.issueToken({id: 1}, null, (token) => {
         bearerAndToken += 'Bearer ' + token
@@ -71,7 +77,7 @@ describe('Rbac Express Tests', () => {
   describe('RbacExpress Functionality Tests', () => {
     let opts = {
       RolesDal: RolesDalFixture.RolesDalMockImplementation // ,
-      // UsersDal: UsersDalFixture.UsersDalMockImplementation
+    // UsersDal: UsersDalFixture.UsersDalMockImplementation
     }
     let rbacExpress
     let bearerAndToken = ''
@@ -86,10 +92,8 @@ describe('Rbac Express Tests', () => {
       server.use(Auth.express.initialize())
       server.use(Auth.express.authenticate())
       server.get('/test', (req, res) => {
-
       })
       rbacExpress = RbacExpress.initialize(opts, server)
-      server.use(rbacExpress)
       server.use(rbacExpress)
     })
 
@@ -103,6 +107,20 @@ describe('Rbac Express Tests', () => {
         .expect(200)
         .end(done)
     })
+    /* it('Should perform remote authorisation and allow users with the permmssions that are not in the deny', (done) => {
+      server.post('/some-remote-authenticated-route', RbacExpress.allow(['update'], { useRemoteAuthorization: true, remoteAuthorizationEndPoint: `localhost:${PORT}/authorize` }), function (req, res) {
+        res.send()
+      })
+
+      // Verifies Rbac requests from remote clients
+      server.post('/authorize', RbacExpress.verify())
+
+      supertest(server)
+        .post('/some-remote-authenticated-route')
+        .set('authorization', bearerAndToken)
+        .expect(200)
+        .end(done)
+    }) */
 
     it('Should NOT permit users with the incorrect correct permissions', (done) => {
       server.get('/some-authenticated-route', RbacExpress.allow(['some_unkown_permisson']), function (req, res) {
