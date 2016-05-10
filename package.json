@@ -53,6 +53,7 @@
     "passport-jwt": "^2.0.0",
     "randomstring": "^1.1.4",
     "rbac-core": "^2.0.0",
+    "request": "^2.72.0",
     "request-promise": "^3.0.0",
     "tamper": "^0.1.0"
   }
