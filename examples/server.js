@@ -5,8 +5,12 @@ const Express = require('express')
 const bodyParser = require('body-parser')
 const rbacExpress = require('./../lib/index').Express
 const RolesDalFixture = require('./../test/lib/fixture/roles_interface_implementation')
+
+const PORT = 9000
 let opts = {
-  RolesDal: RolesDalFixture.RolesDalMockImplementation
+  RolesDal: RolesDalFixture.RolesDalMockImplementation,
+  useRemoteAuthorization: true,
+  remoteAuthorizationEndPoint: `localhost:${PORT}/authorize`
 }
 
 const server = new Express()
@@ -21,7 +25,7 @@ const auth = new AuthStrategy({
   secretOrKey: 'secret',
   verify: (jwtPayload, done) => {
     // Do some JWT checking here
-    done(null, jwtPayload)  // This is passed onto `req.user`
+    done(null, jwtPayload) // This is passed onto `req.user`
   }
 })
 
@@ -65,10 +69,32 @@ server.get('/some-rbac', auth.express.authenticate(), rbacExpress.allow(['update
 server.get('/some-unauthorized-rbac', auth.express.authenticate(), rbacExpress.allow(['some_unkown_permision']), (req, res) => {
   res.send({ response: 'some other unknwn authorized content' })
 })
-server.use(rbacExpress.initialize(opts))
+// server.use(rbacExpress.initialize(opts))
+rbacExpress.initialize(opts)
 server.get('/some-unreachable', auth.express.authenticate(), (req, res) => {
   res.send({ response: 'this url should be unreachable as there are no permissions set on the route' })
 })
-server.listen(9000, () => {
+
+server.post('/some-remote-authenticated-route', auth.express.authenticate(), rbacExpress.allow(['update'], { useRemoteAuthorization: true, remoteAuthorizationEndPoint: `localhost:${PORT}/authorize` }), function (req, res, next) {
+  res.send({message: 'This resource was authenticated remotely'})
+})
+server.post('/some-remote-authenticated-route-unknown-permission', auth.express.authenticate(), rbacExpress.allow(['some_unkown_permision'], { useRemoteAuthorization: true, remoteAuthorizationEndPoint: `localhost:${PORT}/authorize` }), function (req, res, next) {
+  res.send({message: 'This resource was NOT by the remote authenticatin server and uou should NOT BE SEEING THIS !!'})
+})
+/* // Use can use this commented out section below if you have configured remote authorization globally
+server.post('/some-remote-authenticated-route', auth.express.authenticate(), rbacExpress.allow(['update']), function (req, res, next) {
+  res.send({message: 'This resource was authenticated remotely'})
+})
+server.post('/some-remote-authenticated-route-unknown-permission', auth.express.authenticate(), rbacExpress.allow(['some_unkown_permision']), function (req, res, next) {
+  res.send({message: 'This resource was NOT by the remote authenticatin server and uou should NOT BE SEEING THIS !!'})
+})*/
+
+// This middleware will verify authorization requests from remote clients
+server.post('/authorize', rbacExpress.verify())
+const listen = server.listen(PORT, () => {
   console.log('Listening on http://localhost:9000')
+})
+
+listen.on('listening', function () {
+  console.log(listen.address().port)
 })
