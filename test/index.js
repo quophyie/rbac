@@ -26,7 +26,7 @@ describe('RBAC', function () {
       }
 
       const found = permission.some((p) => {
-        return users[user.id] && users[user.id][p]
+        return users[user] && users[user][p]
       })
 
       if (found) {
@@ -44,30 +44,22 @@ describe('RBAC', function () {
 
     nock('http://www.example.com', opts)
       .post('/authorize', {
-        user: {
-          id: 1
-        },
+        user: 1,
         permission: 'users:create'
       })
       .reply(401)
       .post('/authorize', {
-        user: {
-          id: 1
-        },
+        user: 1,
         permission: 'users:read'
       })
       .reply(200)
       .post('/authorize', {
-        user: {
-          id: 1
-        },
+        user: 1,
         permission: 'users:create'
       })
       .reply(401)
       .post('/authorize', {
-        user: {
-          id: 1
-        },
+        user: 1,
         permission: 'users:read'
       })
       .reply(200)
@@ -84,7 +76,7 @@ describe('RBAC', function () {
   it('Rbac.allow should fail if user isn\'t allowed the existing permission locally', function (done) {
     const rbac = new Rbac({ checkPermission: checkPermission })
     rbac
-      .allow({ id: 1 }, 'users:create')
+      .allow(1, 'users:create')
       .then(() => Code.fail('Rbac.allow should fail'))
       .catch((err) => {
         expect(err).to.be.an.error('Inexistent User or Permission')
@@ -95,7 +87,7 @@ describe('RBAC', function () {
   it('Rbac.allow should pass if user is allowed the existing permission locally', function (done) {
     const rbac = new Rbac({ checkPermission: checkPermission })
     rbac
-      .allow({ id: 1 }, 'users:read')
+      .allow(1, 'users:read')
       .then(done)
       .catch(done)
   })
@@ -103,7 +95,7 @@ describe('RBAC', function () {
   it('Rbac.allow should pass if user is allowed any of the existing permissions locally', function (done) {
     const rbac = new Rbac({ checkPermission: checkPermission })
     rbac
-      .allow({ id: 1 }, ['users:read', 'users:create'])
+      .allow(1, ['users:read', 'users:create'])
       .then(done)
       .catch(done)
   })
@@ -118,7 +110,7 @@ describe('RBAC', function () {
       }
     })
     rbac
-      .allow({ id: 1 }, 'users:create')
+      .allow(1, 'users:create')
       .then(() => Code.fail('Rbac.allow should fail'))
       .catch((err) => {
         expect(err.statusCode).to.equal(401)
@@ -136,7 +128,7 @@ describe('RBAC', function () {
       }
     })
     rbac
-      .allow({ id: 1 }, 'users:read')
+      .allow(1, 'users:read')
       .then(done)
       .catch(done)
   })
