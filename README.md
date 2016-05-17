@@ -15,16 +15,19 @@ Check the `/examples` folder.
    * **`remoteAuth`** - An object specifying how to check the user with the given permissions against a remote server;
      * **`url` (Required)** - If `remoteAuth` is set, then you must specify the url of the remote server;
      * **`headers`** - An object containing headers passed with the remote server's request;
-   * **`checkPermission`** - Callback function for local permission evaluation with the signature `function (user, permission)` and returning a Promise. If you're using the Expressjs middleware, `user` will be the same as `req.user` and `permission` the string or array setup in the middleware. If `opts.remoteAuth` is not set, then this property is **required**.
+   * **`checkPermission`** - Callback function for local permission evaluation with the signature `function (userId, permission)` and returning a Promise. If you're using the Expressjs middleware, `userId` will be the same as `req.user.id` and `permission` the string or array setup in the middleware. If `opts.remoteAuth` is not set, then this property is **required**.
 
-### rbac.allow(user, permission, opts)
-   Checks if a given user is allowed for a given permission.
-   * **`user` (Required)** - The user to be checked for permission.
+### rbac.allow(userId, permission, opts)
+   Checks if a given user is allowed for a given permission. Returns a Promise resolving to the user being allowed the
+   permission.
+   * **`userId` (Required)** - The ID of user to be checked for permission.
    * **`permission` (Required)** - The permission or permissions to be checked against the user.
    * **`opts`** - Optional options to be passed to the function. Same properties as the constructor.
 
 ### rbac.express.allow(permission, opts)
- Returns an express middleware function for checking if a given user is allowed for a given permission. Parameters are the same as `rbac.allow`, except for the `user` parameter which does not apply here.
+ Returns an express middleware function for checking if a given user is allowed for a given permission.
+ Parameters are the same as `rbac.allow`, except for the `userId` parameter which does not apply here. **It assumes you
+ have `req.user.id` setup.
 
 ## Tests
 
