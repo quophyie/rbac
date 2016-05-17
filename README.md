@@ -17,16 +17,16 @@ Check the `/examples` folder.
      * **`headers`** - An object containing headers passed with the remote server's request;
    * **`checkPermission`** - Callback function for local permission evaluation with the signature `function (userId, permission)` and returning a Promise. If you're using the Expressjs middleware, `userId` will be the same as `req.user.id` and `permission` the string or array setup in the middleware. If `opts.remoteAuth` is not set, then this property is **required**.
 
-### rbac.allow(userId, permission, opts)
-   Checks if a given user is allowed for a given permission. Returns a Promise resolving to the user being allowed the
+### rbac.authorize(userId, permission, opts)
+   Checks if a given user is authorized for a given permission. Returns a Promise resolving to the user being allowed the
    permission.
    * **`userId` (Required)** - The ID of user to be checked for permission.
    * **`permission` (Required)** - The permission or permissions to be checked against the user.
    * **`opts`** - Optional options to be passed to the function. Same properties as the constructor.
 
-### rbac.express.allow(permission, opts)
- Returns an express middleware function for checking if a given user is allowed for a given permission.
- Parameters are the same as `rbac.allow`, except for the `userId` parameter which does not apply here. **It assumes you
+### rbac.express.authorize(permission, opts)
+ Returns an express middleware function for checking if a given user is authorized for a given permission.
+ Parameters are the same as `rbac.authorize`, except for the `userId` parameter which does not apply here. **It assumes you
  have `req.user.id` setup.
 
 ## Tests
