@@ -11,29 +11,31 @@ describe('RBAC', function () {
 
   before(function () {
     checkPermission = function (user, permission) {
-      const users = [
-        {  // user 0
-          'users:create': true,
-          'users:remove': true
-        },
-        { // users 1
-          'users:read': true
+      return new Promise(function (resolve, reject) {
+        const users = [
+          {  // user 0
+            'users:create': true,
+            'users:remove': true
+          },
+          { // users 1
+            'users:read': true
+          }
+        ]
+
+        if (typeof permission === 'string') {
+          permission = [permission]
         }
-      ]
 
-      if (typeof permission === 'string') {
-        permission = [permission]
-      }
+        const found = permission.some((p) => {
+          return users[user] && users[user][p]
+        })
 
-      const found = permission.some((p) => {
-        return users[user] && users[user][p]
+        if (found) {
+          return resolve()
+        } else {
+          return reject(new Error('Inexistent User or Permission'))
+        }
       })
-
-      if (found) {
-        return Promise.resolve()
-      } else {
-        return Promise.reject(new Error('Inexistent User or Permission'))
-      }
     }
 
     const opts = {
@@ -71,6 +73,17 @@ describe('RBAC', function () {
 
   it('should Rbac throw if opts.remoteAuth is specified and opts.remoteAuth.url is not', function () {
     expect(() => new Rbac({ remoteAuth: {} })).to.throw(TypeError)
+  })
+
+  it('should Rbac throw if userId not a Number or not convertible to a Number', function (done) {
+    const rbac = new Rbac({ checkPermission: checkPermission })
+    rbac
+      .authorize('Not a Number', 'users:create')
+      .then(() => Code.fail('Rbac.authorize should fail'))
+      .catch((err) => {
+        expect(err).to.be.an.error('Invalid userId value: must be a number')
+        done()
+      })
   })
 
   it('Rbac.authorize should fail if user isn\'t allowed the existing permission locally', function (done) {
