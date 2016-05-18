@@ -224,4 +224,30 @@ describe('RBAC', function () {
       done()
     })
   })
+
+  it('Rbac.express.authorize should allow for userId being set', function (done) {
+    const rbac = new Rbac({
+      checkPermission: checkPermission,
+      reqUserId: 'some.prop'
+    })
+    const middleware = rbac
+      .express
+      .authorize('users:read')
+
+    const req = {
+      some: {
+        prop: 1
+      },
+      headers: {
+        authorization: 'Bearer abcd'
+      }
+    }
+
+    middleware(req, null, (err) => {
+      expect(err).to.be.undefined()
+      expect(req.rbac).to.exist().and.be.an.object()
+      expect(req.rbac.permission).to.exist()
+      done()
+    })
+  })
 })
