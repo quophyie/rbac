@@ -4,29 +4,35 @@ const Boom = require('boom')
 const express = require('express')
 const Rbac = require('../lib')
 
+const checkPermission = function (userId, permission) {
+  const users = [
+    {  // user 0
+      'users:create': true,
+      'users:remove': true
+    },
+    { // users 1
+      'users:read': true
+    }
+  ]
+
+  const found = permission.some((p) => {
+    return users[userId] && users[userId][p]
+  })
+
+  if (found) {
+    return Promise.resolve()
+  } else {
+    return Promise.reject(new Error('Inexistent User or Permission'))
+  }
+}
+
 const rbac = new Rbac({
-  checkPermission: function (userId, permission) {
-    const users = [
-      {  // user 0
-        'users:create': true,
-        'users:remove': true
-      },
-      { // users 1
-        'users:read': true
-      }
-    ]
-
-    const found = permission.some((p) => {
-      return users[userId] && users[userId][p]
-    })
-
-    if (found) {
-      return Promise.resolve()
-    } else {
-      return Promise.reject(new Error('Inexistent User or Permission'))
+  principals: {
+    users: {
+      checkPermission: checkPermission
     }
   },
-  reqUserId: 'params.userId'
+  getReqId: (req) => req.params.userId
 })
 
 const app = express()

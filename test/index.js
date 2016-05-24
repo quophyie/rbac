@@ -10,7 +10,7 @@ describe('RBAC', function () {
   let checkPermission
 
   before(function () {
-    checkPermission = function (user, permission) {
+    checkPermission = function (id, permissions) {
       return new Promise(function (resolve, reject) {
         const users = [
           {  // user 0
@@ -22,12 +22,8 @@ describe('RBAC', function () {
           }
         ]
 
-        if (typeof permission === 'string') {
-          permission = [permission]
-        }
-
-        const found = permission.some((p) => {
-          return users[user] && users[user][p]
+        const found = permissions.some((permission) => {
+          return users[id] && users[id][permission]
         })
 
         if (found) {
@@ -46,14 +42,14 @@ describe('RBAC', function () {
 
     nock('http://www.example.com', opts)
       .post('/authorize', {
-        userId: 1,
-        permission: 'users:create'
+        id: 1,
+        permissions: ['users:create']
       })
       .times(1000)
       .reply(401)
       .post('/authorize', {
-        userId: 1,
-        permission: 'users:read'
+        id: 1,
+        permissions: ['users:read']
       })
       .times(1000)
       .reply(200)
@@ -96,10 +92,10 @@ describe('RBAC', function () {
     })
 
     rbac
-      .authorize('Not a Number', 'users', 'users:create')
+      .authorize('Not a Number', 'users', ['users:create'])
       .then(() => Code.fail('Rbac.authorize should fail'))
       .catch((err) => {
-        expect(err).to.be.an.error('Invalid userId value: must be a number')
+        expect(err).to.be.an.error('Invalid id value: must be a number')
         done()
       })
   })
@@ -114,7 +110,7 @@ describe('RBAC', function () {
     })
 
     rbac
-      .authorize(1, 'users', 'users:create')
+      .authorize(1, 'users', ['users:create'])
       .then(() => Code.fail('Rbac.authorize should fail'))
       .catch((err) => {
         expect(err).to.be.an.error('Inexistent User or Permission')
@@ -132,7 +128,7 @@ describe('RBAC', function () {
     })
 
     rbac
-      .authorize(1, 'apps', 'users:create')
+      .authorize(1, 'apps', ['users:create'])
       .then(() => Code.fail('Rbac.authorize should fail'))
       .catch((err) => {
         expect(err).to.be.an.error('Principal type does not exist')
@@ -150,7 +146,7 @@ describe('RBAC', function () {
     })
 
     rbac
-      .authorize(1, 'users', 'users:read')
+      .authorize(1, 'users', ['users:read'])
       .then(done)
       .catch(done)
   })
@@ -184,7 +180,7 @@ describe('RBAC', function () {
       }
     })
     rbac
-      .authorize(1, 'users', 'users:create')
+      .authorize(1, 'users', ['users:create'])
       .then(() => Code.fail('Rbac.authorize should fail'))
       .catch((err) => {
         expect(err.statusCode).to.equal(401)
@@ -206,7 +202,7 @@ describe('RBAC', function () {
       }
     })
     rbac
-      .authorize(1, 'users', 'users:read')
+      .authorize(1, 'users', ['users:read'])
       .then(done)
       .catch(done)
   })
@@ -223,7 +219,7 @@ describe('RBAC', function () {
     })
     const middleware = rbac
       .express
-      .authorize('users:create')
+      .authorize(['users:create'])
 
     const req = {
       user: {
@@ -255,7 +251,7 @@ describe('RBAC', function () {
     })
     const middleware = rbac
       .express
-      .authorize('users:read')
+      .authorize(['users:read'])
 
     const req = {
       user: {
@@ -283,7 +279,7 @@ describe('RBAC', function () {
     })
     const middleware = rbac
       .express
-      .authorize('users:create')
+      .authorize(['users:create'])
 
     const req = {
       user: {
@@ -313,7 +309,7 @@ describe('RBAC', function () {
     })
     const middleware = rbac
       .express
-      .authorize('users:read')
+      .authorize(['users:read'])
 
     const req = {
       user: {
@@ -343,7 +339,7 @@ describe('RBAC', function () {
     })
     const middleware = rbac
       .express
-      .authorize('users:read')
+      .authorize(['users:read'])
 
     const req = {
       some: {
