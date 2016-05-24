@@ -49,36 +49,54 @@ describe('RBAC', function () {
         userId: 1,
         permission: 'users:create'
       })
+      .times(1000)
       .reply(401)
       .post('/authorize', {
         userId: 1,
         permission: 'users:read'
       })
+      .times(1000)
       .reply(200)
-      .post('/authorize', {
-        userId: 1,
-        permission: 'users:create'
-      })
-      .reply(401)
-      .post('/authorize', {
-        userId: 1,
-        permission: 'users:read'
-      })
-      .reply(200)
+      .log(console.log)
   })
 
-  it('should Rbac throw if opts.checkPermission is not specified', function () {
-    expect(() => new Rbac({ some: 'prop' })).to.throw(TypeError)
+  it('should Rbac throw if opts.principals is not specified', function () {
+    expect(() => new Rbac({
+      some: 'prop'
+    })).to.throw(TypeError)
   })
 
-  it('should Rbac throw if opts.remoteAuth is specified and opts.remoteAuth.url is not', function () {
-    expect(() => new Rbac({ remoteAuth: {} })).to.throw(TypeError)
+  it('should Rbac throw if checkPermission is not specified', function () {
+    expect(() => new Rbac({
+      principals: {
+        users: {
+          some: 'prop'
+        }
+      }
+    })).to.throw(TypeError)
+  })
+
+  it('should Rbac throw if remoteAuth is specified and remoteAuth.url is not', function () {
+    expect(() => new Rbac({
+      principals: {
+        users: {
+          remoteAuth: {}
+        }
+      }
+    })).to.throw(TypeError)
   })
 
   it('should Rbac throw if userId not a Number or not convertible to a Number', function (done) {
-    const rbac = new Rbac({ checkPermission: checkPermission })
+    const rbac = new Rbac({
+      principals: {
+        users: {
+          checkPermission: checkPermission
+        }
+      }
+    })
+
     rbac
-      .authorize('Not a Number', 'users:create')
+      .authorize('Not a Number', 'users', 'users:create')
       .then(() => Code.fail('Rbac.authorize should fail'))
       .catch((err) => {
         expect(err).to.be.an.error('Invalid userId value: must be a number')
@@ -87,9 +105,16 @@ describe('RBAC', function () {
   })
 
   it('Rbac.authorize should fail if user isn\'t allowed the existing permission locally', function (done) {
-    const rbac = new Rbac({ checkPermission: checkPermission })
+    const rbac = new Rbac({
+      principals: {
+        users: {
+          checkPermission: checkPermission
+        }
+      }
+    })
+
     rbac
-      .authorize(1, 'users:create')
+      .authorize(1, 'users', 'users:create')
       .then(() => Code.fail('Rbac.authorize should fail'))
       .catch((err) => {
         expect(err).to.be.an.error('Inexistent User or Permission')
@@ -97,33 +122,69 @@ describe('RBAC', function () {
       })
   })
 
-  it('Rbac.authorize should pass if user is allowed the existing permission locally', function (done) {
-    const rbac = new Rbac({ checkPermission: checkPermission })
+  it('Rbac.authorize should fail if user isn\'t of the configured type locally', function (done) {
+    const rbac = new Rbac({
+      principals: {
+        users: {
+          checkPermission: checkPermission
+        }
+      }
+    })
+
     rbac
-      .authorize(1, 'users:read')
+      .authorize(1, 'apps', 'users:create')
+      .then(() => Code.fail('Rbac.authorize should fail'))
+      .catch((err) => {
+        expect(err).to.be.an.error('Principal type does not exist')
+        done()
+      })
+  })
+
+  it('Rbac.authorize should pass if user is allowed the existing permission locally', function (done) {
+    const rbac = new Rbac({
+      principals: {
+        users: {
+          checkPermission: checkPermission
+        }
+      }
+    })
+
+    rbac
+      .authorize(1, 'users', 'users:read')
       .then(done)
       .catch(done)
   })
 
   it('Rbac.authorize should pass if user is allowed any of the existing permissions locally', function (done) {
-    const rbac = new Rbac({ checkPermission: checkPermission })
+    const rbac = new Rbac({
+      principals: {
+        users: {
+          checkPermission: checkPermission
+        }
+      }
+    })
+
     rbac
-      .authorize(1, ['users:read', 'users:create'])
+      .authorize(1, 'users', ['users:read', 'users:create'])
       .then(done)
       .catch(done)
   })
 
   it('Rbac.authorize should fail if user isn\'t allowed the existing permission remotely', function (done) {
     const rbac = new Rbac({
-      remoteAuth: {
-        url: 'http://www.example.com/authorize',
-        headers: {
-          authorization: 'Bearer abcd'
+      principals: {
+        users: {
+          remoteAuth: {
+            url: 'http://www.example.com/authorize',
+            headers: {
+              authorization: 'Bearer abcd'
+            }
+          }
         }
       }
     })
     rbac
-      .authorize(1, 'users:create')
+      .authorize(1, 'users', 'users:create')
       .then(() => Code.fail('Rbac.authorize should fail'))
       .catch((err) => {
         expect(err.statusCode).to.equal(401)
@@ -133,23 +194,31 @@ describe('RBAC', function () {
 
   it('Rbac.authorize should pass if user is allowed the existing permission remotely', function (done) {
     const rbac = new Rbac({
-      remoteAuth: {
-        url: 'http://www.example.com/authorize',
-        headers: {
-          authorization: 'Bearer abcd'
+      principals: {
+        users: {
+          remoteAuth: {
+            url: 'http://www.example.com/authorize',
+            headers: {
+              authorization: 'Bearer abcd'
+            }
+          }
         }
       }
     })
     rbac
-      .authorize(1, 'users:read')
+      .authorize(1, 'users', 'users:read')
       .then(done)
       .catch(done)
   })
 
   it('Rbac.express.authorize should fail if user isn\'t allowed the existing permission remotely', function (done) {
     const rbac = new Rbac({
-      remoteAuth: {
-        url: 'http://www.example.com/authorize'
+      principals: {
+        users: {
+          remoteAuth: {
+            url: 'http://www.example.com/authorize'
+          }
+        }
       }
     })
     const middleware = rbac
@@ -157,7 +226,10 @@ describe('RBAC', function () {
       .authorize('users:create')
 
     const req = {
-      user: { id: 1 },
+      user: {
+        id: 1,
+        type: 'users'
+      },
       headers: {
         authorization: 'Bearer abcd'
       }
@@ -173,8 +245,12 @@ describe('RBAC', function () {
 
   it('Rbac.express.authorize should pass if user is allowed the existing permission remotely', function (done) {
     const rbac = new Rbac({
-      remoteAuth: {
-        url: 'http://www.example.com/authorize'
+      principals: {
+        users: {
+          remoteAuth: {
+            url: 'http://www.example.com/authorize'
+          }
+        }
       }
     })
     const middleware = rbac
@@ -182,7 +258,10 @@ describe('RBAC', function () {
       .authorize('users:read')
 
     const req = {
-      user: { id: 1 },
+      user: {
+        id: 1,
+        type: 'users'
+      },
       headers: {
         authorization: 'Bearer abcd'
       }
@@ -190,20 +269,27 @@ describe('RBAC', function () {
 
     middleware(req, null, (err) => {
       expect(err).to.be.undefined()
-      expect(req.rbac).to.exist().and.be.an.object()
-      expect(req.rbac.permission).to.exist()
       done()
     })
   })
 
   it('Rbac.express.authorize should fail if user isn\'t allowed the existing permission locally', function (done) {
-    const rbac = new Rbac({ checkPermission: checkPermission })
+    const rbac = new Rbac({
+      principals: {
+        users: {
+          checkPermission: checkPermission
+        }
+      }
+    })
     const middleware = rbac
       .express
       .authorize('users:create')
 
     const req = {
-      user: { id: 1 },
+      user: {
+        id: 1,
+        type: 'users'
+      },
       headers: {
         authorization: 'Bearer abcd'
       }
@@ -218,38 +304,21 @@ describe('RBAC', function () {
   })
 
   it('Rbac.express.authorize should pass if user is allowed the existing permission locally', function (done) {
-    const rbac = new Rbac({ checkPermission: checkPermission })
-    const middleware = rbac
-      .express
-      .authorize('users:read')
-
-    const req = {
-      user: { id: 1 },
-      headers: {
-        authorization: 'Bearer abcd'
-      }
-    }
-
-    middleware(req, null, (err) => {
-      expect(err).to.be.undefined()
-      expect(req.rbac).to.exist().and.be.an.object()
-      expect(req.rbac.permission).to.exist()
-      done()
-    })
-  })
-
-  it('Rbac.express.authorize should allow for userId being set', function (done) {
     const rbac = new Rbac({
-      checkPermission: checkPermission,
-      reqUserId: 'some.prop'
+      principals: {
+        users: {
+          checkPermission: checkPermission
+        }
+      }
     })
     const middleware = rbac
       .express
       .authorize('users:read')
 
     const req = {
-      some: {
-        prop: 1
+      user: {
+        id: 1,
+        type: 'users'
       },
       headers: {
         authorization: 'Bearer abcd'
@@ -258,8 +327,36 @@ describe('RBAC', function () {
 
     middleware(req, null, (err) => {
       expect(err).to.be.undefined()
-      expect(req.rbac).to.exist().and.be.an.object()
-      expect(req.rbac.permission).to.exist()
+      done()
+    })
+  })
+
+  it('Rbac.express.authorize should allow for userId being set', function (done) {
+    const rbac = new Rbac({
+      principals: {
+        users: {
+          checkPermission: checkPermission
+        }
+      },
+      getReqId: (req) => req.some.prop,
+      getReqType: (req) => req.some.type
+    })
+    const middleware = rbac
+      .express
+      .authorize('users:read')
+
+    const req = {
+      some: {
+        prop: 1,
+        type: 'users'
+      },
+      headers: {
+        authorization: 'Bearer abcd'
+      }
+    }
+
+    middleware(req, null, (err) => {
+      expect(err).to.be.undefined()
       done()
     })
   })
