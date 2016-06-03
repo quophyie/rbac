@@ -3,26 +3,28 @@
 const Rbac = require('../lib')
 
 const rbac = new Rbac({
-  checkPermission: function (userId, permission) {
-    const users = [
-      {  // user 0
-        'users:create': true,
-        'users:remove': true
-      },
-      { // users 1
-        'users:read': true
+  checkPermission: function (id, permissions) {
+    return new Promise((resolve, reject) => {
+      const users = [
+        {  // user 0
+          'users:create': true,
+          'users:remove': true
+        },
+        { // users 1
+          'users:read': true
+        }
+      ]
+
+      const found = permissions.some((permission) => {
+        return users[id] && users[id][permission]
+      })
+
+      if (found) {
+        return resolve()
+      } else {
+        return reject(new Error('Inexistent User or Permission'))
       }
-    ]
-
-    const found = permission.some((p) => {
-      return users[userId] && users[userId][p]
     })
-
-    if (found) {
-      return Promise.resolve()
-    } else {
-      return Promise.reject(new Error('Inexistent User or Permission'))
-    }
   }
 })
 
