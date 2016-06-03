@@ -7,33 +7,19 @@ const nock = require('nock')
 const Rbac = require('../lib/index')
 
 describe('RBAC', function () {
-  let checkPermission
+  let getPermission
 
   before(function () {
-    checkPermission = function (user, permission) {
-      return new Promise(function (resolve, reject) {
+    getPermission = function (id) {
+      return new Promise((resolve, reject) => {
         const users = [
-          {  // user 0
-            'users:create': true,
-            'users:remove': true
-          },
-          { // users 1
-            'users:read': true
-          }
+          ['users:create', 'users:remove'], // user 0
+          ['users:read']  // user 1
         ]
-
-        if (typeof permission === 'string') {
-          permission = [permission]
-        }
-
-        const found = permission.some((p) => {
-          return users[user] && users[user][p]
-        })
-
-        if (found) {
-          return resolve()
+        if (users[id]) {
+          resolve(users[id])
         } else {
-          return reject(new Error('Inexistent User or Permission'))
+          reject(new Error('Inexistent User'))
         }
       })
     }
@@ -60,7 +46,7 @@ describe('RBAC', function () {
       .log(console.log)
   })
 
-  it('should Rbac throw if opts.checkPermission is not specified', function () {
+  it('should Rbac throw if opts.getPermission is not specified', function () {
     expect(() => new Rbac({ some: 'prop' })).to.throw(TypeError)
   })
 
@@ -69,7 +55,7 @@ describe('RBAC', function () {
   })
 
   it('Rbac,authorize should throw if id not a Number or not convertible to a Number', function (done) {
-    const rbac = new Rbac({ checkPermission: checkPermission })
+    const rbac = new Rbac({ getPermission: getPermission })
     rbac
       .authorize('Not a Number', ['users:create'])
       .then(() => Code.fail('Rbac.authorize should fail'))
@@ -80,7 +66,7 @@ describe('RBAC', function () {
   })
 
   it('Rbac.authorize should throw if permissions is not an array', function (done) {
-    const rbac = new Rbac({ checkPermission: checkPermission })
+    const rbac = new Rbac({ getPermission: getPermission })
     rbac
       .authorize(1, 'users:create')
       .then(() => Code.fail('Rbac.authorize should fail'))
@@ -91,29 +77,29 @@ describe('RBAC', function () {
   })
 
   it('Rbac.authorize should fail if user isn\'t allowed the existing permission', function (done) {
-    const rbac = new Rbac({ checkPermission: checkPermission })
+    const rbac = new Rbac({ getPermission: getPermission })
     rbac
       .authorize(1, ['users:create'])
       .then(() => Code.fail('Rbac.authorize should fail'))
       .catch((err) => {
-        expect(err).to.be.an.error('Inexistent User or Permission')
+        expect(err).to.be.an.error('Permission denied.')
         done()
       })
   })
 
   it('Rbac.authorize should pass if user is allowed the existing permission', function (done) {
-    const rbac = new Rbac({ checkPermission: checkPermission })
+    const rbac = new Rbac({ getPermission: getPermission })
     rbac
       .authorize(1, ['users:read'])
-      .then(done)
+      .then(() => done())
       .catch(done)
   })
 
   it('Rbac.authorize should pass if user is allowed any of the existing permissions', function (done) {
-    const rbac = new Rbac({ checkPermission: checkPermission })
+    const rbac = new Rbac({ getPermission: getPermission })
     rbac
       .authorize(1, ['users:read', 'users:create'])
-      .then(done)
+      .then(() => done())
       .catch(done)
   })
 
@@ -202,7 +188,7 @@ describe('RBAC', function () {
   })
 
   it('Rbac.express.authorize should fail if user isn\'t allowed the existing permission', function (done) {
-    const rbac = new Rbac({ checkPermission: checkPermission })
+    const rbac = new Rbac({ getPermission: getPermission })
     const middleware = rbac
       .express
       .authorize(['users:create'])
@@ -222,7 +208,7 @@ describe('RBAC', function () {
   })
 
   it('Rbac.express.authorize should pass if user is allowed the existing permission', function (done) {
-    const rbac = new Rbac({ checkPermission: checkPermission })
+    const rbac = new Rbac({ getPermission: getPermission })
     const middleware = rbac
       .express
       .authorize(['users:read'])
@@ -241,7 +227,7 @@ describe('RBAC', function () {
 
   it('Rbac.express.authorize should allow for userId being set', function (done) {
     const rbac = new Rbac({
-      checkPermission: checkPermission,
+      getPermission: getPermission,
       getReqId: (req) => req.some.prop
     })
     const middleware = rbac

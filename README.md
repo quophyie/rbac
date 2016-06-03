@@ -31,7 +31,7 @@ app.get('/',
   * **`remoteAuth` {object} (Optional)** - Optional configuration object for allowing remote HTTP permission evaluation.
     *  **`headers` {object} (Optional)** - Optional headers to pass in the HTTP request.
     * **`url` {string}** - Url for the HTTP request, required if `opts.remoteAuth` is set. The endpoint is expected to accept a JSON object with `permissions {array}` property and return 200 in case of success or different 200 in case of unauthorized. It can also return some claims about the principal (i.e. the user id) which will be merged with `req.user`, when called by the express middleware.
-  *  **`checkPermission` {function}** - Callback function for local permission evaluation with the signature `(id, permissions)` and returning a Promise. **If `remoteAuth` is not set, then this property is required**.
+  *  **`checkPermission` {function}** - Callback function for local permission evaluation with the signature `function (id)` and returning a Promise resolving to the principal permissions array. **If `opts.remoteAuth` is not set, then this property is required.**
    * **`getReqId` {function} (Optional)** - A callback with the signature `(req) => {}` that returns the principal ID from the HTTP request object. Defaults to `(req) => req.user.id`.
 
 ### rbac.authorize(id, permissions)
