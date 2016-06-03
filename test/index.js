@@ -242,7 +242,7 @@ describe('RBAC', function () {
   it('Rbac.express.authorize should allow for userId being set', function (done) {
     const rbac = new Rbac({
       checkPermission: checkPermission,
-      reqUserId: 'some.prop'
+      getReqId: (req) => req.some.prop
     })
     const middleware = rbac
       .express

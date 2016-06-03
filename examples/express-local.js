@@ -28,7 +28,7 @@ const rbac = new Rbac({
       }
     })
   },
-  reqUserId: 'params.userId'
+  getReqId: (req) => req.params.userId
 })
 
 const app = express()
