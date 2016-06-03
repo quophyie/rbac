@@ -6,10 +6,14 @@ const nock = require('nock')
 const Rbac = require('../lib')
 
 // Authorize server mock
-nock('http://www.example.com')
+const opts = {
+  reqheaders: {
+    authorization: /Bearer\s\S+/   // You need to pass along the token for your requests
+  }
+}
+nock('http://www.example.com', opts)
   .post('/authorize', {
-    userId: 1,
-    permission: ['users:read']
+    permissions: ['users:read']
   })
   .times(1000)
   .delay(500)
@@ -23,15 +27,13 @@ nock('http://www.example.com')
 const rbac = new Rbac({
   remoteAuth: {
     url: 'http://www.example.com/authorize'
-  },
-  reqUserId: 'params.userId'
+  }
 })
 
 const app = express()
 
-app.get('/:userId',
-  // You probably want to authenticate the user first.
-  rbac.express.authorize(['users:read']),
+app.get('/',
+  rbac.express.authorizeRemote(['users:read']),
   (req, res, next) => {
     res.json({ message: 'You have acces to this awesome content!' })
   })
