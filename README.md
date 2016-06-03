@@ -11,27 +11,45 @@ Check the `/examples` folder.
 
 ## API
 ### const rbac = new Rbac(opts)
- * **`opts` (Required)** -  is an object literal containing options to control how the permissions are being verified (locally or remotely);
-   * **`remoteAuth`** - An object specifying how to check the user with the given permissions against a remote server;
-     * **`url` (Required)** - If `remoteAuth` is set, then you must specify the url of the remote server;
-     * **`headers`** - An object containing headers passed with the remote server's request;
-   * **`checkPermission`** - Callback function for local permission evaluation with the signature `function (userId, permission)` and returning a Promise. If you're using the Expressjs middleware, `userId` will be the same as `req.user.id` and `permission` the string or array setup in the middleware. If `opts.remoteAuth` is not set, then this property is **required**.
-   * **`reqUserId`** - the namespace where the userId is setup in the request, for the express middleware. Defaults to `'user.id'`.
+Creates a new Rbac instance with the given options for local or remote authorization. It also provides an express middleware that can use information in the request (i.e. the authentication token or principal) in the authorization process.
 
-### rbac.authorize(userId, permission, opts)
-   Checks if a given user is authorized for a given permission. Returns a Promise resolving to the user being allowed the
-   permission. This function can authorize the user both locally or remotely. For that you need to implement the `checkPermission`
-   callback or `remoteAuth.url`, respectively. Although it can make authorize from two different sources, the flow
-   is the same.
-   * **`userId` (Required)** - The ID of user to be checked for permission.
-   * **`permission` (Required)** - The permission or permissions to be checked against the user.
-   * **`opts`** - Optional options to be passed to the function. Same properties as the constructor.
+```js
+const rbac = new Rbac({
+  remoteAuth: {
+    url: 'http://www.example.com/authorize'
+  }
+})
 
-### rbac.express.authorize(permission, opts)
- Returns an express middleware function for checking if a given user is authorized for a given permission.
- Parameters are the same as `rbac.authorize`, except for the `userId` parameter which can be setup in the constructor. Note
- that this middleware also sets the authorization header with the current request's header, for remote authorization. If you
- don't want this behaviour, set it to `undefined` in `opts`.
+app.get('/',
+  rbac.express.authorizeRemote(['users:read']),
+  (req, res, next) => {
+    res.json({ message: 'You have acces to this awesome content!' })
+  })
+```
+
+* **`opts` {object}** - Options object.
+  * **`remoteAuth` {object} (Optional)** - Optional configuration object for allowing remote HTTP permission evaluation.
+    *  **`headers` {object} (Optional)** - Optional headers to pass in the HTTP request.
+    * **`url` {string}** - Url for the HTTP request, required if `opts.remoteAuth` is set. The endpoint is expected to accept a JSON object with `permissions {array}` property and return 200 in case of success or different 200 in case of unauthorized. It can also return some claims about the principal (i.e. the user id) which will be merged with `req.user`, when called by the express middleware.
+  *  **`checkPermission` {function}** - Callback function for local permission evaluation with the signature `(id, permissions)` and returning a Promise. **If `remoteAuth` is not set, then this property is required**.
+   * **`getReqId` {function} (Optional)** - A callback with the signature `(req) => {}` that returns the principal ID from the HTTP request object. Defaults to `(req) => req.user.id`.
+
+### rbac.authorize(id, permissions)
+Checks if a given principal is authorized for any of the given permissions. Returns a Promise resolving to the principal being allowed the permission. This function can authorize the principal locally, for which you need to define the `checkPermission` callback in the instance options.
+   * **`id` {number}** - The principal id to be checked against the permissions.
+   * **`permissions` {array}** - The permissions to be checked against the principal.
+
+### rbac.authorizeRemote(permissions, headers)
+Checks if a given principal is authorized for any of the given permissions. Returns a Promise resolving to the principal being allowed the permission. The remote server can also return some claims about the principal, which will be returned in the Promise. This function can authorize the principal remotely, for which you need to define the `remoteAuth` object in the instance options.
+
+* **`permissions` {array}** - The permissions to be checked against the principal.
+* **`headers` {object} (Optional)** - Optional headers to pass in the HTTP request.
+
+### rbac.express.authorize(permissions)
+ Returns an express middleware function for checking if the principal who made the request is authorized for any of the given permissions. Parameters are the same as rbac.authorize, except for the `id` parameter which can be setup in the constructor options via the getReqId callback.
+
+### rbac.express.authorizeRemote(permissions)
+Returns an express middleware function for checking if the principal who made the request is authorized for any of the given permissions. Parameters are the same as rbac.authorizeRemote, except for the `headers` parameter which can be setup in the constructor options via the `remoteAuth.headers` callback. It will define the `authorization` header as the current request authorization header.
 
 ## Tests
 

@@ -1,6 +1,6 @@
 {
   "name": "@c8/rbac",
-  "version": "5.1.4",
+  "version": "6.0.0",
   "description": "Local and remote permission-based authorization.",
   "main": "lib/index.js",
   "engines": {
