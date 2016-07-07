@@ -410,7 +410,7 @@ describe('RBAC', function () {
       const rbac = new Rbac({ getPermission: getPermission })
       const middleware = rbac
         .express
-        .authorize(['users:create'])
+        .authorize('users:create')
 
       const req = {
         user: {
@@ -430,7 +430,7 @@ describe('RBAC', function () {
       const rbac = new Rbac({ getPermission: getPermission })
       const middleware = rbac
         .express
-        .authorize({ permissions: ['users:read'] })
+        .authorize('users:read')
 
       const req = {
         user: {
@@ -451,7 +451,7 @@ describe('RBAC', function () {
       })
       const middleware = rbac
         .express
-        .authorize({ permissions: ['users:read'] })
+        .authorize('users:read')
 
       const req = {
         some: {
