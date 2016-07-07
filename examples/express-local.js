@@ -8,7 +8,7 @@ const rbac = new Rbac({
   checkPermission: function (id, permissions) {
     return new Promise((resolve, reject) => {
       const users = [
-        {  // user 0
+        { // user 0
           'users:create': true,
           'users:remove': true
         },
