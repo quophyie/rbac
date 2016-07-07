@@ -70,7 +70,7 @@ describe('RBAC', function () {
     it('should throw if id not a Number or not convertible to a Number', function (done) {
       const rbac = new Rbac({ getPermission: getPermission })
       rbac
-        .authorize('Not a Number', ['users:create'], null)
+        .authorize('Not a Number', { permissions: 'users:create', checkType: null })
         .then(() => Code.fail('Rbac.authorize should fail'))
         .catch((err) => {
           expect(err).to.be.an.error('Invalid userId value: must be a number.')
@@ -81,7 +81,7 @@ describe('RBAC', function () {
     it('should throw if permissions is not an array', function (done) {
       const rbac = new Rbac({ getPermission: getPermission })
       rbac
-        .authorize(1, 'users:create', null)
+        .authorize(1, { permissions: 'users:create', checkType: null })
         .then(() => Code.fail('Rbac.authorize should fail'))
         .catch((err) => {
           expect(err).to.be.an.error('Invalid permissions value: must be an array')
@@ -92,7 +92,7 @@ describe('RBAC', function () {
     it('should throw if permissions are more than one', function (done) {
       const rbac = new Rbac({ getPermission: getPermission })
       rbac
-        .authorize(1, ['users:read', 'users:create'], null)
+        .authorize(1, { permissions: ['users:read', 'users:create'], checkType: null })
         .then(() => Code.fail('Rbac.authorize should fail'))
         .catch((err) => {
           expect(err).to.be.an.error()
@@ -104,7 +104,7 @@ describe('RBAC', function () {
     it("should fail if user isn't allowed the existing permission", function (done) {
       const rbac = new Rbac({ getPermission: getPermission })
       rbac
-        .authorize(1, ['users:create'])
+        .authorize(1, { permissions: ['users:create'], checkType: null })
         .then(() => Code.fail('Rbac.authorize should fail'))
         .catch((err) => {
           expect(err).to.be.an.error('Permission denied.')
@@ -115,7 +115,7 @@ describe('RBAC', function () {
     it('should pass if user is allowed the existing permission', function (done) {
       const rbac = new Rbac({ getPermission: getPermission })
       rbac
-        .authorize(1, ['users:read'], null)
+        .authorize(1, { permissions: ['users:read'], checkType: null })
         .then(() => done())
         .catch(done)
     })
@@ -127,7 +127,7 @@ describe('RBAC', function () {
     it('should fail if the number of permissions is less than 2', function (done) {
       const rbac = new Rbac({ getPermission: getPermission })
       rbac
-        .authorize(1, ['users:create'], 'OR')
+        .authorize(1, { permissions: ['users:create'], checkType: 'OR' })
         .then(done)
         .catch((err) => {
           expect(err).to.be.an.error()
@@ -139,7 +139,7 @@ describe('RBAC', function () {
     it('should fail if the user has none of the permissions', function (done) {
       const rbac = new Rbac({ getPermission: getPermission })
       rbac
-        .authorize(1, ['users:milkyway', 'users:blackhole'], 'OR')
+        .authorize(1, { permissions: ['users:milkyway', 'users:blackhole'], checkType: 'OR' })
         .then(done)
         .catch((err) => {
           expect(err).to.be.an.error('Permission denied.')
@@ -150,7 +150,7 @@ describe('RBAC', function () {
     it('should pass if the user has at least one permission', function (done) {
       const rbac = new Rbac({ getPermission: getPermission })
       rbac
-        .authorize(1, ['users:read', 'users:andromeda'], 'OR')
+        .authorize(1, { permissions: ['users:read', 'users:andromeda'], checkType: 'OR' })
         .then(() => done())
         .catch(done)
     })
@@ -162,7 +162,7 @@ describe('RBAC', function () {
     it('should fail if the number of permissions is less than 2', function (done) {
       const rbac = new Rbac({ getPermission: getPermission })
       rbac
-        .authorize(1, ['users:create'], 'AND')
+        .authorize(1, { permissions: ['users:create'], checkType: 'AND' })
         .then(done)
         .catch((err) => {
           expect(err).to.be.an.error()
@@ -174,7 +174,7 @@ describe('RBAC', function () {
     it('should fail if the user has none of the permissions', function (done) {
       const rbac = new Rbac({ getPermission: getPermission })
       rbac
-        .authorize(0, ['users:milkyway', 'users:blackhole'], 'AND')
+        .authorize(0, { permissions: ['users:milkyway', 'users:blackhole'], checkType: 'AND' })
         .then(done)
         .catch((err) => {
           expect(err).to.be.an.error('Permission denied.')
@@ -185,7 +185,7 @@ describe('RBAC', function () {
     it('should fail if the user has just one of the permissions', function (done) {
       const rbac = new Rbac({ getPermission: getPermission })
       rbac
-        .authorize(0, ['users:create', 'users:blackhole'], 'AND')
+        .authorize(0, { permissions: ['users:create', 'users:blackhole'], checkType: 'AND' })
         .then(done)
         .catch((err) => {
           expect(err).to.be.an.error('Permission denied.')
@@ -196,7 +196,7 @@ describe('RBAC', function () {
     it('should pass if the user has all permissions', function (done) {
       const rbac = new Rbac({ getPermission: getPermission })
       rbac
-        .authorize(0, ['users:create', 'users:remove'], 'AND')
+        .authorize(0, { permissions: ['users:create', 'users:remove'], checkType: 'AND' })
         .then(() => done())
         .catch(done)
     })
@@ -430,7 +430,7 @@ describe('RBAC', function () {
       const rbac = new Rbac({ getPermission: getPermission })
       const middleware = rbac
         .express
-        .authorize(['users:read'])
+        .authorize({ permissions: ['users:read'] })
 
       const req = {
         user: {
@@ -451,7 +451,7 @@ describe('RBAC', function () {
       })
       const middleware = rbac
         .express
-        .authorize(['users:read'])
+        .authorize({ permissions: ['users:read'] })
 
       const req = {
         some: {
