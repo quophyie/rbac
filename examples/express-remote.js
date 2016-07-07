@@ -8,7 +8,7 @@ const Rbac = require('../lib')
 // Authorize server mock
 const opts = {
   reqheaders: {
-    authorization: /Bearer\s\S+/   // You need to pass along the token for your requests
+    authorization: /Bearer\s\S+/ // You need to pass along the token for your requests
   }
 }
 nock('http://www.example.com', opts)
